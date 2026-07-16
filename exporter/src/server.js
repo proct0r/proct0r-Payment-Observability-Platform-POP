@@ -2,7 +2,17 @@ import express from "express";
 import dotenv from "dotenv";
 import client from "prom-client";
 
+import "./metrics.js";
 import logger from "./logger.js";
+
+import {connectDatabase}
+from "./database.js";
+
+
+import {
+collectPaymentMetrics
+}
+from "./collector.js";
 
 
 dotenv.config();
@@ -10,19 +20,17 @@ dotenv.config();
 
 const app = express();
 
-const PORT =
-process.env.PORT || 9400;
+const PORT = process.env.PORT || 9400;
 
 
 
-app.get("/health",(req,res)=>{
+app.get("/health", (req,res)=>{
 
     res.json({
 
         status:"UP",
 
-        service:
-        "Payment Observability Exporter"
+        service:"Payment Observability Exporter"
 
     });
 
@@ -30,30 +38,50 @@ app.get("/health",(req,res)=>{
 
 
 
-app.get("/metrics",async(req,res)=>{
+app.get("/metrics", async (req,res)=>{
 
-    res.set(
-        "Content-Type",
-        client.register.contentType
-    );
+    try {
+
+        res.setHeader(
+            "Content-Type",
+            client.register.contentType
+        );
 
 
-    res.end(
-        await client.register.metrics()
-    );
+        const metrics =
+            await client.register.metrics();
+
+
+        res.send(metrics);
+
+
+    } catch(error){
+
+        logger.error(
+            "Metrics generation failed",
+            error
+        );
+
+
+        res.status(500).send(error.message);
+
+    }
 
 });
 
+await connectDatabase();
+
+
+setInterval(
+    collectPaymentMetrics,
+    60000
+);
 
 
 app.listen(PORT,()=>{
 
-
     logger.info(
-
         `Payment exporter running on port ${PORT}`
-
     );
-
 
 });
