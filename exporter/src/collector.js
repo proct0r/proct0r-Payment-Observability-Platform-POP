@@ -1,85 +1,83 @@
-import {getDatabase} from "./database.js";
-
-import {
-    transactionSummaryQuery
-}
-from "./queries.js";
+import {getDatabase}
+from "./database.js";
 
 
 import {
-    transactionVolume,
-    approvedTransactions,
-    customerDeclines,
-    systemDeclines
+transactionVolumeNaira,
+successRate,
+transactionsPerSecond,
+responseCodeCounter,
+channelTransactions,
+networkTransactions
 }
 from "./metrics.js";
 
 
-import logger from "./logger.js";
-
-
+import {
+paymentMetricsQuery
+}
+from "./queries.js";
 
 export async function collectPaymentMetrics(){
+const pool=getDatabase();
+if(!pool){
+return;
+}
+
+const [rows]=
+await pool.query(
+paymentMetricsQuery
+);
+
+let total=0;
+let approved=0;
+let volume=0;
 
 
-    try{
+
+rows.forEach(row=>{
 
 
-        const pool =
-        getDatabase();
+total += Number(row.total_transactions);
+approved += Number(row.approved_transactions);
+volume += Number(row.total_volume);
 
 
-        if(!pool){
 
-            logger.warn(
-                "Database connection unavailable"
-            );
-
-            return;
-
-        }
-
-                const [rows] = await pool.query(transactionSummaryQuery);
-
-                const data = rows[0];
+responseCodeCounter
+.labels(row.response_code)
+.inc(
+Number(row.total_transactions)
+);
 
 
-        transactionVolume.inc(
-            Number(data.total_transactions)
-        );
+
+channelTransactions
+.labels(row.channel)
+.inc(
+Number(row.total_transactions)
+);
 
 
-        approvedTransactions.inc(
-            Number(data.approved_transactions)
-        );
 
+networkTransactions
+.labels(row.network)
+.inc(
+Number(row.total_transactions)
+);
+});
 
-        customerDeclines.inc(
-            Number(data.customer_declines)
-        );
+transactionVolumeNaira.set(volume);
 
+successRate.set(
+    total > 0
+    ?
+    Number(((approved / total) * 100).toFixed(2))
+    :
+    0
+);
 
-        systemDeclines.inc(
-            Number(data.system_declines)
-        );
-
-
-        logger.info(
-            "Payment metrics updated"
-        );
-
-
-    }
-    catch(error){
-
-
-        logger.error(
-            "Metric collection failed",
-            error
-        );
-
-
-    }
-
-
+transactionsPerSecond.set(
+total / 60
+);
 }
