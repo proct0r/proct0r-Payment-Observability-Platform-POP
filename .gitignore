@@ -1,1 +1,40 @@
 
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Build output
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# Grafana exports
+*.json.bak
+
+# Database files
+*.mdf
+*.ldf
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.pfx
