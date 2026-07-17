@@ -52,3 +52,21 @@ payment-exporter | Connected to MySQL
 payment-exporter | Payment exporter running on port 9400
 prometheus | Server is ready to receive web requests
 grafana | HTTP Server Listen
+
+#Check status:
+git status
+
+#Expected
+.env
+.gitignore
+docker-compose.yml
+docs/deployment/docker.md
+
+#To commit
+git add .
+
+#Commit:
+git commit -m "Commit 7: Containerize payment observability platform with Docker Compose"
+
+#Push:
+git push origin main
