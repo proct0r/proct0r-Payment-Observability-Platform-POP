@@ -1,0 +1,29 @@
+groups:
+
+- name: payment-error-budget
+
+  rules:
+
+
+  - alert: PaymentErrorBudgetBurn
+
+    expr:
+
+      payment:error_rate:ratio > 0.001
+
+
+    for: 10m
+
+
+    labels:
+
+      severity: warning
+
+
+    annotations:
+
+      summary:
+        Payment error budget is burning too quickly
+
+      description:
+        Payment failure rate exceeded SLO threshold.

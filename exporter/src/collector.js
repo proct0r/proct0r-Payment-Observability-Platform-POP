@@ -1,83 +1,186 @@
-import {getDatabase}
-from "./database.js";
-
+import pool from "./database.js";
 
 import {
-transactionVolumeNaira,
-successRate,
-transactionsPerSecond,
-responseCodeCounter,
-channelTransactions,
-networkTransactions
+    paymentTransactionVolumeNaira,
+    paymentSuccessRatePercentage,
+    paymentTransactionsPerSecond,
+    paymentResponseCodeTotal,
+    paymentChannelTransactions,
+    paymentNetworkTransactions
 }
 from "./metrics.js";
 
 
-import {
-paymentMetricsQuery
-}
-from "./queries.js";
-
 export async function collectPaymentMetrics(){
-const pool=getDatabase();
-if(!pool){
-return;
-}
 
-const [rows]=
-await pool.query(
-paymentMetricsQuery
-);
-
-let total=0;
-let approved=0;
-let volume=0;
+try {
 
 
+    // Transaction Volume
+    const [volume] =
+    await pool.query(`
+        SELECT 
+        SUM(amount) total_volume
+        FROM payment_transactions
+    `);
 
-rows.forEach(row=>{
 
-
-total += Number(row.total_transactions);
-approved += Number(row.approved_transactions);
-volume += Number(row.total_volume);
+    paymentTransactionVolumeNaira.set(
+        Number(volume[0].total_volume || 0)
+    );
 
 
 
-responseCodeCounter
-.labels(row.response_code)
-.inc(
-Number(row.total_transactions)
-);
+    // Success Rate
+    const [success] =
+    await pool.query(`
+
+        SELECT
+
+        SUM(transaction_status='SUCCESS') success_count,
+
+        COUNT(*) total_count
+
+        FROM payment_transactions
+
+    `);
 
 
-
-channelTransactions
-.labels(row.channel)
-.inc(
-Number(row.total_transactions)
-);
+    const total =
+    Number(success[0].total_count);
 
 
+    const successCount =
+    Number(success[0].success_count);
 
-networkTransactions
-.labels(row.network)
-.inc(
-Number(row.total_transactions)
-);
-});
 
-transactionVolumeNaira.set(volume);
-
-successRate.set(
+    const successRate =
     total > 0
     ?
-    Number(((approved / total) * 100).toFixed(2))
+    (successCount / total) * 100
     :
-    0
-);
+    0;
 
-transactionsPerSecond.set(
-total / 60
-);
+
+    paymentSuccessRatePercentage.set(
+        Number(successRate.toFixed(2))
+    );
+
+
+
+    // TPS
+    const [tps] =
+    await pool.query(`
+
+        SELECT
+        COUNT(*) transactions
+
+        FROM payment_transactions
+
+        WHERE created_at >= NOW() - INTERVAL 1 SECOND
+
+    `);
+
+
+    paymentTransactionsPerSecond.set(
+        Number(tps[0].transactions)
+    );
+
+
+
+    // Response codes
+
+    const [responses] =
+    await pool.query(`
+
+        SELECT
+
+        response_code,
+
+        COUNT(*) total
+
+        FROM payment_transactions
+
+        GROUP BY response_code
+
+    `);
+
+
+    responses.forEach(row=>{
+
+        paymentResponseCodeTotal
+        .labels(row.response_code)
+        .set(Number(row.total));
+
+    });
+
+
+
+    // Channels
+
+    const [channels] =
+    await pool.query(`
+
+        SELECT
+
+        channel,
+
+        COUNT(*) total
+
+        FROM payment_transactions
+
+        GROUP BY channel
+
+    `);
+
+
+    channels.forEach(row=>{
+
+        paymentChannelTransactions
+        .labels(row.channel)
+        .set(Number(row.total));
+
+    });
+
+
+
+    // Networks
+
+    const [networks] =
+    await pool.query(`
+
+        SELECT
+
+        network,
+
+        COUNT(*) total
+
+        FROM payment_transactions
+
+        GROUP BY network
+
+    `);
+
+
+
+    networks.forEach(row=>{
+
+        paymentNetworkTransactions
+        .labels(row.network)
+        .set(Number(row.total));
+
+    });
+
+
+
+}
+catch(error){
+
+    console.error(
+        "Metric collection failed",
+        error
+    );
+
+}
+
 }

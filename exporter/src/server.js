@@ -8,7 +8,6 @@ import logger from "./logger.js";
 import {connectDatabase}
 from "./database.js";
 
-
 import {
 collectPaymentMetrics
 }
@@ -23,24 +22,17 @@ const app = express();
 const PORT = process.env.PORT || 9400;
 
 
-
-app.get("/health", (req,res)=>{
-
+app.get("/health",(req,res)=>{
     res.json({
-
         status:"UP",
-
         service:"Payment Observability Exporter"
-
     });
-
 });
 
 
+app.get("/metrics", async(req,res)=>{
 
-app.get("/metrics", async (req,res)=>{
-
-    try {
+    try{
 
         res.setHeader(
             "Content-Type",
@@ -49,25 +41,25 @@ app.get("/metrics", async (req,res)=>{
 
 
         const metrics =
-            await client.register.metrics();
+        await client.register.metrics();
 
 
         res.send(metrics);
 
 
-    } catch(error){
+    }catch(error){
 
         logger.error(
             "Metrics generation failed",
             error
         );
 
-
-        res.status(500).send(error.message);
-
+        res.status(500)
+        .send(error.message);
     }
 
 });
+
 
 await connectDatabase();
 

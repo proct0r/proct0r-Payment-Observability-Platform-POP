@@ -1,0 +1,33 @@
+groups:
+
+  - name: payment-slo-recording-rules
+
+    interval: 30s
+
+    rules:
+
+
+      - record: payment:success_rate:ratio
+
+        expr:
+
+          payment_success_rate_percentage / 100
+
+
+
+      - record: payment:error_rate:ratio
+
+        expr:
+
+          1 -
+          (
+            payment_success_rate_percentage / 100
+          )
+
+
+
+      - record: payment:availability:ratio
+
+        expr:
+
+          payment_switch_uptime_percentage / 100

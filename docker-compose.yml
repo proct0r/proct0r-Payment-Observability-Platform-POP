@@ -43,6 +43,7 @@ services:
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./docker/prometheus/rules.yml:/etc/prometheus/rules.yml
+        - ./docker/prometheus/slo-rules.yml:/etc/prometheus/slo-rules.yml
 
     restart: unless-stopped
 
