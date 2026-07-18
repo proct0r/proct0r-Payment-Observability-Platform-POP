@@ -1,0 +1,27 @@
+name: Release Validation
+
+on:
+
+  workflow_dispatch:
+
+jobs:
+
+  release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Validate Prometheus Config
+        run: docker run --rm \
+          -v ${{ github.workspace }}/docker/prometheus:/etc/prometheus \
+          prom/prometheus \
+          --config.file=/etc/prometheus/prometheus.yml
+
+      - name: Validate Alertmanager Config
+        run: docker run --rm \
+          -v ${{ github.workspace }}/docker/alertmanager:/etc/alertmanager \
+          prom/alertmanager \
+          --config.file=/etc/alertmanager/alertmanager.yml

@@ -1,0 +1,57 @@
+groups:
+
+- name: payment-slo-rules
+
+  rules:
+
+
+  - alert: PaymentAvailabilityLow
+
+    expr: payment_switch_uptime_percentage < 99
+
+    for: 5m
+
+    labels:
+      severity: critical
+
+    annotations:
+
+      summary: Payment switch availability below SLA
+
+      description: Payment switch uptime has dropped below 99%.
+
+
+
+  - alert: PaymentApprovalRateLow
+
+    expr: payment_success_rate_percentage < 90
+
+    for: 5m
+
+    labels:
+
+      severity: warning
+
+    annotations:
+
+      summary: Payment approval rate degradation
+
+      description: Approval rate is below acceptable threshold.
+
+
+
+  - alert: PaymentTPSDrop
+
+    expr: payment_transactions_per_second < 5
+
+    for: 3m
+
+    labels:
+
+      severity: critical
+
+    annotations:
+
+      summary: Payment TPS dropped
+
+      description: Transaction throughput has fallen below expected level.

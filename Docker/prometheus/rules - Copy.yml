@@ -1,0 +1,37 @@
+groups:
+
+- name: payment-alerts
+
+  rules:
+
+  - alert: PaymentSuccessRateLow
+
+    expr:
+      payment_success_rate_percentage < 95
+
+    for: 5m
+
+    labels:
+      severity: critical
+
+    annotations:
+      summary: Payment success rate below threshold
+
+      description:
+        Payment success rate has dropped below 95% for more than 5 minutes.
+
+
+
+  - alert: PaymentExporterDown
+
+    expr:
+      up{job="payment-exporter"} == 0
+
+    for: 2m
+
+    labels:
+      severity: critical
+
+    annotations:
+      summary:
+        Payment exporter unavailable

@@ -1,12 +1,13 @@
 import pool from "./database.js";
 
 import {
-    paymentTransactionVolumeNaira,
-    paymentSuccessRatePercentage,
-    paymentTransactionsPerSecond,
-    paymentResponseCodeTotal,
-    paymentChannelTransactions,
-    paymentNetworkTransactions
+paymentTransactionVolumeNaira,
+paymentSuccessRatePercentage,
+paymentTransactionsPerSecond,
+paymentResponseCodeTotal,
+paymentChannelTransactions,
+paymentNetworkTransactions,
+paymentSwitchHealthScore
 }
 from "./metrics.js";
 
@@ -172,6 +173,18 @@ try {
     });
 
 
+    const healthScore =
+(
+successRate * 0.7
++
+100 * 0.3
+);
+
+paymentSwitchHealthScore.set(
+Number(healthScore.toFixed(2))
+);
+
+
 
 }
 catch(error){
@@ -182,5 +195,7 @@ catch(error){
     );
 
 }
+
+
 
 }

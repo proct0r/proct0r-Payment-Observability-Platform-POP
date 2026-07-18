@@ -1,37 +1,108 @@
 groups:
 
+
 - name: payment-alerts
 
   rules:
 
-  - alert: PaymentSuccessRateLow
+
+  - alert: PaymentTPSDrop
 
     expr:
-      payment_success_rate_percentage < 95
+
+      payment_transactions_per_second < 5
+
+    for: 2m
+
+    labels:
+
+      severity: critical
+
+    annotations:
+
+      summary:
+
+        Payment TPS dropped
+
+
+      description:
+
+        Transaction throughput has fallen below normal.
+
+
+# ------------------------------------
+
+
+  - alert: ApprovalRateDegradation
+
+    expr:
+
+      payment_success_rate_percentage < 90
 
     for: 5m
 
     labels:
-      severity: critical
+
+      severity: warning
+
 
     annotations:
-      summary: Payment success rate below threshold
+
+      summary:
+
+        Payment approval rate degraded
+
 
       description:
-        Payment success rate has dropped below 95% for more than 5 minutes.
 
+        Approval rate below 90 percent.
+
+
+# ------------------------------------
+
+
+  - alert: HighPaymentDeclines
+
+    expr:
+
+      rate(payment_response_code_total{response_code!="00"}[5m]) > 10
+
+    for: 5m
+
+
+    labels:
+
+      severity: warning
+
+
+    annotations:
+
+      summary:
+
+        High payment decline rate detected
+
+
+
+# ------------------------------------
 
 
   - alert: PaymentExporterDown
 
     expr:
+
       up{job="payment-exporter"} == 0
+
 
     for: 2m
 
+
     labels:
+
       severity: critical
 
+
     annotations:
+
       summary:
+
         Payment exporter unavailable

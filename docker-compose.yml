@@ -43,7 +43,7 @@ services:
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./docker/prometheus/rules.yml:/etc/prometheus/rules.yml
-        - ./docker/prometheus/slo-rules.yml:/etc/prometheus/slo-rules.yml
+      - ./docker/prometheus/slo-rules.yml:/etc/prometheus/slo-rules.yml
 
     restart: unless-stopped
 
@@ -73,8 +73,16 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
 
-    restart: unless-stopped
+      # Dashboard JSON files
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
 
+      # Dashboard provisioning configuration
+      - ./docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+
+      # Datasource provisioning (Prometheus)
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+
+    restart: unless-stopped
 
 
 volumes:

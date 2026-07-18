@@ -3,9 +3,8 @@ global:
 
 
 route:
-  receiver: default-receiver
-
+  receiver: default
 
 receivers:
 
-- name: default-receiver
+- name: default

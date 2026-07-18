@@ -81,3 +81,14 @@ new client.Gauge({
         "network"
     ]
 });
+
+export const paymentSwitchHealthScore =
+new client.Gauge({
+
+name:
+"payment_switch_health_score",
+
+help:
+"Overall payment switch health score"
+
+});
