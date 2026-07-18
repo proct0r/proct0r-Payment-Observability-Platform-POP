@@ -1,6 +1,18 @@
 import { faker } from "@faker-js/faker";
 import { getPool } from "./database.js";
 
+import { generateTransaction } from "../src/paymentGenerator.js";
+
+test("payment transaction should generate transaction object", async () => {
+
+    const transaction = await generateTransaction();
+
+    expect(transaction).toHaveProperty("amount");
+    expect(transaction).toHaveProperty("channel");
+    expect(transaction).toHaveProperty("network");
+
+});
+
 const channels = [
     "ATM",
     "POS",
