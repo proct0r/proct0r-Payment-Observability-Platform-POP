@@ -6,21 +6,39 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
+
 jobs:
 
   docker:
 
     runs-on: ubuntu-latest
 
+
     steps:
 
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
 
       - name: Build Exporter Image
-        run: docker build -t payment-exporter ./exporter
+        run: |
+          docker build \
+          -t payment-exporter \
+          -f exporter/Dockerfile \
+          exporter
+
 
       - name: Build Simulator Image
-        run: docker build -t payment-simulator ./simulator
+        run: |
+          docker build \
+          -t payment-simulator \
+          -f simulator/Dockerfile \
+          simulator
+
 
       - name: Validate Docker Compose
         run: docker compose config
