@@ -1,13 +1,26 @@
-- name: Build Exporter Image
-  run: |
-    docker build \
-      -t payment-exporter \
-      -f exporter/Dockerfile \
-      exporter
+name: Docker Build
 
-- name: Build Simulator Image
-  run: |
-    docker build \
-      -t payment-simulator \
-      -f simulator/Dockerfile \
-      simulator
+on:
+
+  push:
+    branches:
+      - main
+
+jobs:
+
+  docker:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Build Exporter Image
+        run: docker build -t payment-exporter ./exporter
+
+      - name: Build Simulator Image
+        run: docker build -t payment-simulator ./simulator
+
+      - name: Validate Docker Compose
+        run: docker compose config
